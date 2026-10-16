@@ -37,6 +37,7 @@ def health():
 
 
 import asyncio
+from app.evaluator import evaluate_claim_against_evidence
 
 
 @app.post("/verify")
@@ -44,30 +45,56 @@ async def verify(request: VerifyRequest):
     claims = extract_claims(request.response)
     if not claims:
         return {
-            "status": "received",
+            "status": "completed",
             "message": "No candidate claims detected in the response.",
             "response_length": len(request.response),
             "claims_count": 0,
+            "summary": {
+                "supported": 0,
+                "unverified": 0,
+                "reliability_score": 0.0,
+            },
             "claims": [],
         }
 
-    # Fetch evidence for each claim concurrently
-    async def fetch_claim_evidence(claim_text: str) -> dict:
+    # Fetch evidence and evaluate each claim concurrently
+    async def process_single_claim(claim_text: str) -> dict:
         search_res = await search_all_sources(claim_text, limit_per_source=3)
+        evidence_list = search_res.get("results", [])
+
+        # Evaluate claim against retrieved evidence
+        evaluation = evaluate_claim_against_evidence(claim_text, evidence_list)
+
         return {
             "claim": claim_text,
-            "evidence_count": search_res.get("unique_records", 0),
+            "verdict": evaluation["verdict"],
+            "confidence": evaluation["confidence"],
+            "explanation": evaluation["explanation"],
+            "best_evidence": evaluation["best_evidence"],
+            "evidence_count": len(evidence_list),
             "sources": search_res.get("sources", {}),
-            "evidence": search_res.get("results", []),
+            "evidence": evidence_list,
         }
 
-    claim_results = await asyncio.gather(*(fetch_claim_evidence(c) for c in claims))
+    claim_results = await asyncio.gather(*(process_single_claim(c) for c in claims))
+
+    # Calculate overall reliability summary
+    supported_count = sum(1 for c in claim_results if c["verdict"] == "supported")
+    unverified_count = sum(1 for c in claim_results if c["verdict"] == "unverified")
+    total_claims = len(claim_results)
+
+    reliability_score = round((supported_count / total_claims) * 100, 1) if total_claims else 0.0
 
     return {
         "status": "completed",
-        "message": "Candidate claims extracted and evidence retrieved.",
+        "message": "Claims extracted, evidence retrieved, and verdicts evaluated.",
         "response_length": len(request.response),
-        "claims_count": len(claim_results),
+        "claims_count": total_claims,
+        "summary": {
+            "supported": supported_count,
+            "unverified": unverified_count,
+            "reliability_score": reliability_score,
+        },
         "claims": claim_results,
     }
 
