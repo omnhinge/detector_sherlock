@@ -1,3 +1,4 @@
+from app.claims import extract_claims
 from app.sources.pubmed import search_pubmed
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
@@ -37,10 +38,13 @@ def health():
 
 @app.post("/verify")
 def verify(request: VerifyRequest):
+    claims = extract_claims(request.response)
     return {
         "status": "received",
-        "message": "Response received. Evidence verification is the next step.",
+        "message": "Candidate claims extracted. Evidence verification is the next step.",
         "response_length": len(request.response),
+        "claims_count": len(claims),
+        "claims": claims,
     }
 
 
