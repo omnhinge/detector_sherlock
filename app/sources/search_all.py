@@ -92,6 +92,7 @@ def deduplicate_records(records: list[dict]) -> list[dict]:
 async def search_all_sources(
     query: str,
     limit_per_source: int = 5,
+    selected_sources: list[str] | None = None,
 ) -> dict:
     """Search research sources concurrently and merge their records."""
 
@@ -101,7 +102,10 @@ async def search_all_sources(
         "OpenAlex": search_openalex,
     }
 
-    names = list(source_functions)
+    if selected_sources:
+        names = [s for s in selected_sources if s in source_functions]
+    else:
+        names = list(source_functions)
 
     tasks = [
         source_functions[name](query, limit_per_source)

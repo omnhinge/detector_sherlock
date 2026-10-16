@@ -1,4 +1,5 @@
 from app.claims import extract_claims
+from app.router import detect_domain, get_sources_for_domain
 from app.sources.pubmed import search_pubmed
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
@@ -59,7 +60,14 @@ async def verify(request: VerifyRequest):
 
     # Fetch evidence and evaluate each claim concurrently
     async def process_single_claim(claim_text: str) -> dict:
-        search_res = await search_all_sources(claim_text, limit_per_source=3)
+        domain = detect_domain(claim_text)
+        sources_to_check = get_sources_for_domain(domain)
+
+        search_res = await search_all_sources(
+            claim_text,
+            limit_per_source=3,
+            selected_sources=sources_to_check,
+        )
         evidence_list = search_res.get("results", [])
 
         # Evaluate claim against retrieved evidence
@@ -67,6 +75,8 @@ async def verify(request: VerifyRequest):
 
         return {
             "claim": claim_text,
+            "domain": domain,
+            "sources_targeted": sources_to_check,
             "verdict": evaluation["verdict"],
             "confidence": evaluation["confidence"],
             "explanation": evaluation["explanation"],
