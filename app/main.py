@@ -36,15 +36,39 @@ def health():
     return {"status": "healthy"}
 
 
+import asyncio
+
+
 @app.post("/verify")
-def verify(request: VerifyRequest):
+async def verify(request: VerifyRequest):
     claims = extract_claims(request.response)
+    if not claims:
+        return {
+            "status": "received",
+            "message": "No candidate claims detected in the response.",
+            "response_length": len(request.response),
+            "claims_count": 0,
+            "claims": [],
+        }
+
+    # Fetch evidence for each claim concurrently
+    async def fetch_claim_evidence(claim_text: str) -> dict:
+        search_res = await search_all_sources(claim_text, limit_per_source=3)
+        return {
+            "claim": claim_text,
+            "evidence_count": search_res.get("unique_records", 0),
+            "sources": search_res.get("sources", {}),
+            "evidence": search_res.get("results", []),
+        }
+
+    claim_results = await asyncio.gather(*(fetch_claim_evidence(c) for c in claims))
+
     return {
-        "status": "received",
-        "message": "Candidate claims extracted. Evidence verification is the next step.",
+        "status": "completed",
+        "message": "Candidate claims extracted and evidence retrieved.",
         "response_length": len(request.response),
-        "claims_count": len(claims),
-        "claims": claims,
+        "claims_count": len(claim_results),
+        "claims": claim_results,
     }
 
 
