@@ -78,12 +78,21 @@ async def verify(request: VerifyRequest):
 
     claim_results = await asyncio.gather(*(process_single_claim(c) for c in claims))
 
-    # Calculate overall reliability summary
+    # Calculate overall reliability and risk metrics
+    total_claims = len(claim_results)
     supported_count = sum(1 for c in claim_results if c["verdict"] == "supported")
     unverified_count = sum(1 for c in claim_results if c["verdict"] == "unverified")
-    total_claims = len(claim_results)
+    claims_with_evidence = sum(1 for c in claim_results if c["evidence_count"] > 0)
 
     reliability_score = round((supported_count / total_claims) * 100, 1) if total_claims else 0.0
+    evidence_coverage = round((claims_with_evidence / total_claims) * 100, 1) if total_claims else 0.0
+
+    if reliability_score >= 75.0:
+        hallucination_risk = "low"
+    elif reliability_score >= 40.0:
+        hallucination_risk = "medium"
+    else:
+        hallucination_risk = "high"
 
     return {
         "status": "completed",
@@ -94,6 +103,12 @@ async def verify(request: VerifyRequest):
             "supported": supported_count,
             "unverified": unverified_count,
             "reliability_score": reliability_score,
+            "hallucination_risk": hallucination_risk,
+            "evidence_coverage": evidence_coverage,
+            "caveat": (
+                "An unverified verdict indicates that no authoritative literature in the queried "
+                "databases corroborated the claim. It does not automatically guarantee the statement is false."
+            ),
         },
         "claims": claim_results,
     }
