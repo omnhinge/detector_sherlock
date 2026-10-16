@@ -2,6 +2,7 @@ from app.claims import extract_claims
 from app.router import detect_domain, get_sources_for_domain
 from app.sources.pubmed import search_pubmed
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from app.sources.crossref import search_crossref
 from app.sources.openalex import search_openalex
@@ -12,6 +13,15 @@ app = FastAPI(
     title="Detector Sherlock",
     description="Evidence-based AI response verification API",
     version="0.1.0",
+)
+
+# Allow cross-origin requests from Chrome extensions and local tools
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 

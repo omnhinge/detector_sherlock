@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "Detector Sherlock - AI Evidence Verifier",
+  "version": "1.0.0",
+  "description": "Verifies factual claims in AI responses against authoritative research sources (PubMed, Crossref, OpenAlex).",
+  "permissions": [
+    "contextMenus",
+    "activeTab",
+    "storage"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Detector Sherlock"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}
