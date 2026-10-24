@@ -1,5 +1,6 @@
 import re
 from typing import Any
+from app.nli_engine import score_nli
 
 
 # Common English words that carry little specific factual meaning.
@@ -108,13 +109,16 @@ def evaluate_claim_against_evidence(
     evidence_records: list[dict[str, Any]],
 ) -> dict[str, Any]:
     """
-    Compares a single claim against all retrieved evidence papers.
+    Compares a single claim against all retrieved evidence papers using a dual-tier pipeline:
+    1. Lexical fast filter & passage retrieval (keyword overlap)
+    2. Neural Natural Language Inference (NLI entailment / contradiction scoring)
 
     Determines:
     - verdict: 'supported', 'contradicted', or 'unverified'
     - confidence: float between 0.0 and 1.0
     - best_evidence: the paper and specific sentence that relates to the claim
     - explanation: human-readable explanation of the verdict
+    - nli: neural inference distribution
     """
     claim_keywords = extract_keywords(claim)
 
@@ -124,6 +128,7 @@ def evaluate_claim_against_evidence(
             "confidence": 0.0,
             "explanation": "Claim does not contain sufficient specific factual keywords to verify.",
             "best_evidence": None,
+            "nli": {"available": False},
         }
 
     if not evidence_records:
@@ -132,14 +137,14 @@ def evaluate_claim_against_evidence(
             "confidence": 0.0,
             "explanation": "No relevant authoritative records were found for this claim.",
             "best_evidence": None,
+            "nli": {"available": False},
         }
 
     best_match_record = None
     best_snippet = ""
     highest_score = 0.0
 
-    # First, scan all records for direct contradictions
-    # (A contradiction exists when a paper discusses the subject but asserts opposing polarity)
+    # First, scan all records for direct lexical contradictions
     for record in evidence_records:
         title = record.get("title", "")
         abstract = record.get("abstract", "")
@@ -171,6 +176,7 @@ def evaluate_claim_against_evidence(
                         "sources": record.get("sources"),
                         "snippet": title,
                     },
+                    "nli": {"available": False},
                 }
 
             # Check contradiction against snippet
@@ -187,6 +193,7 @@ def evaluate_claim_against_evidence(
                             "sources": record.get("sources"),
                             "snippet": cand_snippet,
                         },
+                        "nli": {"available": False},
                     }
 
         # Track best matching record for support/unverified
@@ -195,7 +202,53 @@ def evaluate_claim_against_evidence(
             best_snippet = cand_snippet if cand_snippet else title
             best_match_record = record
 
-    # Verdict threshold logic for support:
+    # Tier 2: Neural Natural Language Inference check if best passage found
+    nli_res = {"available": False}
+    if best_match_record and best_snippet:
+        nli_res = score_nli(premise=best_snippet, hypothesis=claim)
+
+    # If NLI is available, evaluate neural inference probabilities
+    if nli_res.get("available") and nli_res.get("contradiction") is not None:
+        p_contra = nli_res["contradiction"]
+        p_entail = nli_res["entailment"]
+
+        if p_contra >= 0.65:
+            return {
+                "verdict": "contradicted",
+                "confidence": round(p_contra, 2),
+                "explanation": (
+                    f"Contradicted by evidence in '{best_match_record.get('title')}': "
+                    f"Neural NLI detected high semantic contradiction ({int(p_contra * 100)}%). "
+                    f"Snippet: \"{best_snippet}\""
+                ),
+                "best_evidence": {
+                    "title": best_match_record.get("title"),
+                    "url": best_match_record.get("url"),
+                    "sources": best_match_record.get("sources"),
+                    "snippet": best_snippet,
+                },
+                "nli": nli_res,
+            }
+        elif p_entail >= 0.65:
+            blended_conf = round(0.4 * highest_score + 0.6 * p_entail, 2)
+            return {
+                "verdict": "supported",
+                "confidence": blended_conf,
+                "explanation": (
+                    f"Supported by evidence from {best_match_record.get('sources', ['credible source'])} "
+                    f"in '{best_match_record.get('title')}': \"{best_snippet}\" "
+                    f"(Neural entailment: {int(p_entail * 100)}%)"
+                ),
+                "best_evidence": {
+                    "title": best_match_record.get("title"),
+                    "url": best_match_record.get("url"),
+                    "sources": best_match_record.get("sources"),
+                    "snippet": best_snippet,
+                },
+                "nli": nli_res,
+            }
+
+    # Lexical threshold logic for support / unverified
     if highest_score >= 0.60:
         verdict = "supported"
         explanation = (
@@ -226,4 +279,5 @@ def evaluate_claim_against_evidence(
             if best_match_record
             else None
         ),
+        "nli": nli_res,
     }

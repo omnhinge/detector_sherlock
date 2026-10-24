@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detector Sherlock</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <span class="icon">🔍</span>
+      <h1>Detector Sherlock</h1>
+    </div>
+    <span class="badge version">v1.0</span>
+  </header>
+
+  <main class="container">
+    <section class="input-section">
+      <div class="textarea-header">
+        <label for="responseInput">AI Response / Statement to Verify:</label>
+        <button id="pasteBtn" type="button" class="btn-text">📋 Paste</button>
+      </div>
+      <textarea id="responseInput" rows="4" placeholder="Paste response from ChatGPT, Claude, Gemini, or select text on page..."></textarea>
+      
+      <div class="action-bar">
+        <button id="verifyBtn" class="btn-primary">
+          <span class="btn-text-default">Verify with Evidence</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Loading State -->
+    <div id="loadingState" class="state-container hidden">
+      <div class="spinner"></div>
+      <p>Consulting PubMed, Crossref, OpenAlex, SEC EDGAR, and GovData...</p>
+    </div>
+
+    <!-- Error State -->
+    <div id="errorState" class="state-container hidden alert-box error">
+      <p id="errorMessage"></p>
+    </div>
+
+    <!-- Results Section -->
+    <section id="resultsSection" class="results-section hidden">
+      <div class="summary-card">
+        <div class="score-display">
+          <div class="score-circle">
+            <span id="reliabilityScore">--</span>
+            <span class="score-unit">%</span>
+          </div>
+          <div class="score-meta">
+            <div class="risk-indicator">
+              Risk: <span id="hallucinationRisk" class="badge">--</span>
+            </div>
+            <div class="coverage-text">
+              Coverage: <span id="evidenceCoverage">--</span>%
+            </div>
+          </div>
+        </div>
+        <div class="verdict-counts">
+          <span class="count-tag supported">Supported: <strong id="countSupported">0</strong></span>
+          <span class="count-tag contradicted">Contradicted: <strong id="countContradicted">0</strong></span>
+          <span class="count-tag unverified">Unverified: <strong id="countUnverified">0</strong></span>
+        </div>
+      </div>
+
+      <div class="claims-header">
+        <h3>Evaluated Claims (<span id="claimsTotalCount">0</span>)</h3>
+      </div>
+
+      <div id="claimsList" class="claims-list"></div>
+
+      <p id="summaryCaveat" class="disclaimer"></p>
+    </section>
+  </main>
+
+  <script src="popup.js"></script>
+</body>
+</html>

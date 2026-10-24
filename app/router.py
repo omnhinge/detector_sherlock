@@ -26,11 +26,24 @@ SPACE_KEYWORDS = {
     "astronomy", "astrophysics", "solar", "spacecraft", "nasa", "esa", "cosmic",
 }
 
+FINANCIAL_KEYWORDS = {
+    "tesla", "revenue", "quarterly", "earnings", "fiscal", "delivery", "deliveries",
+    "stock", "shares", "dividend", "sec", "nasdaq", "nyse", "ipo", "profit",
+    "margin", "billion", "million", "valuation", "apple", "microsoft", "amazon",
+    "google", "meta", "nvidia", "gigafactory", "roadster", "q1", "q2", "q3", "q4",
+}
+
+GOVERNMENT_KEYWORDS = {
+    "gdp", "inflation", "cpi", "rbi", "reserve", "monetary", "repo", "budget",
+    "deficit", "unemployment", "population", "census", "treaty", "parliament",
+    "ministry", "tax", "tariff", "economic", "economy",
+}
+
 
 def detect_domain(claim: str) -> str:
     """
     Identifies the subject domain of a claim based on keywords.
-    Returns: 'biomedical', 'computing', 'space', or 'general'.
+    Returns: 'biomedical', 'computing', 'space', 'financial', 'government', or 'general'.
     """
     text_lower = claim.lower()
     words = set(re.findall(r"\b[a-z0-9_-]+\b", text_lower))
@@ -39,11 +52,15 @@ def detect_domain(claim: str) -> str:
     bio_matches = len(words & BIOMEDICAL_KEYWORDS)
     comp_matches = len(words & COMPUTING_KEYWORDS)
     space_matches = len(words & SPACE_KEYWORDS)
+    fin_matches = len(words & FINANCIAL_KEYWORDS)
+    gov_matches = len(words & GOVERNMENT_KEYWORDS)
 
     counts = {
         "biomedical": bio_matches,
         "computing": comp_matches,
         "space": space_matches,
+        "financial": fin_matches,
+        "government": gov_matches,
     }
 
     best_domain = max(counts, key=counts.get)
@@ -61,6 +78,12 @@ def get_sources_for_domain(domain: str) -> list[str]:
     if domain == "biomedical":
         # Biomedical relies heavily on PubMed alongside Crossref and OpenAlex
         return ["PubMed", "Crossref", "OpenAlex"]
+    elif domain == "financial":
+        # Corporate disclosures and financial filings
+        return ["SEC EDGAR", "Crossref", "OpenAlex"]
+    elif domain == "government":
+        # Macroeconomic and official government data
+        return ["World Bank / GovData", "Crossref", "OpenAlex"]
     elif domain in ("computing", "space"):
         # Technical/scientific computing doesn't belong in medical PubMed
         return ["Crossref", "OpenAlex"]

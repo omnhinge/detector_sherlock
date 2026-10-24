@@ -1,4 +1,3 @@
-
 import asyncio
 import re
 import unicodedata
@@ -6,6 +5,8 @@ import unicodedata
 from app.sources.pubmed import search_pubmed
 from app.sources.crossref import search_crossref
 from app.sources.openalex import search_openalex
+from app.sources.edgar import search_edgar
+from app.sources.datagov import search_datagov
 
 
 def normalize_doi(doi: str | None) -> str | None:
@@ -38,6 +39,10 @@ def normalize_record(record: dict) -> dict:
     if doi:
         url = f"https://doi.org/{doi}"
 
+    sources = record.get("sources")
+    if not sources:
+        sources = [record.get("source", "Unknown")]
+
     return {
         "title": (record.get("title") or "Untitled").strip(),
         "abstract": record.get("abstract") or "",
@@ -45,7 +50,7 @@ def normalize_record(record: dict) -> dict:
         "doi": doi,
         "authors": record.get("authors") or [],
         "published_year": record.get("published_year"),
-        "sources": [record.get("source", "Unknown")],
+        "sources": sources,
     }
 
 
@@ -57,8 +62,15 @@ def deduplicate_records(records: list[dict]) -> list[dict]:
         doi = normalize_doi(record.get("doi"))
         title_key = normalize_title(record.get("title", ""))
 
-        # Prefer DOI matching; use title only when DOI is unavailable.
-        key = f"doi:{doi}" if doi else f"title:{title_key}"
+        # Prefer DOI matching; use title or url when DOI is unavailable.
+        if doi:
+            key = f"doi:{doi}"
+        elif title_key:
+            key = f"title:{title_key}"
+        elif record.get("url"):
+            key = f"url:{record.get('url')}"
+        else:
+            key = f"raw:{id(record)}"
 
         if key in unique:
             existing = unique[key]
@@ -94,12 +106,14 @@ async def search_all_sources(
     limit_per_source: int = 5,
     selected_sources: list[str] | None = None,
 ) -> dict:
-    """Search research sources concurrently and merge their records."""
+    """Search research and public record sources concurrently and merge their records."""
 
     source_functions = {
         "PubMed": search_pubmed,
         "Crossref": search_crossref,
         "OpenAlex": search_openalex,
+        "SEC EDGAR": search_edgar,
+        "World Bank / GovData": search_datagov,
     }
 
     if selected_sources:
@@ -118,7 +132,7 @@ async def search_all_sources(
     )
 
     source_status = {}
-    all_records = []
+    merged_records = []
 
     for name, response in zip(names, responses):
         if isinstance(response, Exception):
@@ -127,23 +141,20 @@ async def search_all_sources(
                 "count": 0,
                 "error": str(response),
             }
-            continue
+        else:
+            source_status[name] = {
+                "status": "ok",
+                "count": len(response),
+            }
 
-        source_status[name] = {
-            "status": "success",
-            "count": len(response),
-        }
+            for record in response:
+                merged_records.append(normalize_record(record))
 
-        for item in response:
-            all_records.append(normalize_record(item))
-
-    unique_records = deduplicate_records(all_records)
+    deduped = deduplicate_records(merged_records)
 
     return {
         "query": query,
+        "total": len(deduped),
         "sources": source_status,
-        "records_found": len(all_records),
-        "unique_records": len(unique_records),
-        "duplicates_removed": len(all_records) - len(unique_records),
-        "results": unique_records,
+        "results": deduped,
     }

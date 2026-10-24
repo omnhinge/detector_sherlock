@@ -2,16 +2,28 @@ from app.claims import extract_claims
 from app.router import detect_domain, get_sources_for_domain
 from app.sources.pubmed import search_pubmed
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from app.sources.crossref import search_crossref
 from app.sources.openalex import search_openalex
 from app.sources.search_all import search_all_sources
+import asyncio
+from app.evaluator import evaluate_claim_against_evidence
 
 
 app = FastAPI(
     title="Detector Sherlock",
-    description="Evidence-based AI response verification API",
-    version="0.1.0",
+    description="Evidence-based AI response verification engine with hybrid NLI & public records",
+    version="0.3.0",
+)
+
+# Allow cross-origin requests from Chrome extensions and local tools
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
@@ -28,17 +40,22 @@ def home():
     return {
         "project": "Detector Sherlock",
         "message": "AI response verification engine is running",
-        "version": "0.1.0",
+        "version": "0.3.0",
     }
 
 
 @app.get("/health")
 def health():
-    return {"status": "healthy"}
-
-
-import asyncio
-from app.evaluator import evaluate_claim_against_evidence
+    return {
+        "status": "healthy",
+        "version": "0.3.0",
+        "features": {
+            "spacy_atomic_claims": True,
+            "sec_edgar": True,
+            "world_bank_govdata": True,
+            "hybrid_nli": True,
+        },
+    }
 
 
 @app.post("/verify")
@@ -52,8 +69,11 @@ async def verify(request: VerifyRequest):
             "claims_count": 0,
             "summary": {
                 "supported": 0,
+                "contradicted": 0,
                 "unverified": 0,
                 "reliability_score": 0.0,
+                "hallucination_risk": "low",
+                "evidence_coverage": 0.0,
             },
             "claims": [],
         }
@@ -81,6 +101,7 @@ async def verify(request: VerifyRequest):
             "confidence": evaluation["confidence"],
             "explanation": evaluation["explanation"],
             "best_evidence": evaluation["best_evidence"],
+            "nli": evaluation.get("nli", {}),
             "evidence_count": len(evidence_list),
             "sources": search_res.get("sources", {}),
             "evidence": evidence_list,
@@ -121,7 +142,7 @@ async def verify(request: VerifyRequest):
             "hallucination_risk": hallucination_risk,
             "evidence_coverage": evidence_coverage,
             "caveat": (
-                "An unverified verdict indicates that no authoritative literature in the queried "
+                "An unverified verdict indicates that no authoritative records in the queried "
                 "databases corroborated the claim. A contradicted verdict indicates that retrieved "
                 "evidence asserts opposing findings."
             ),
@@ -161,17 +182,14 @@ async def crossref_search(q: str, limit: int = 5):
         "results": results,
     }
 
+
 @app.get("/sources/openalex")
 async def openalex_search(q: str, limit: int = 5):
     if not q.strip():
         return {"results": []}
 
     limit = max(1, min(limit, 10))
-
-    results = await search_openalex(
-        q.strip(),
-        limit,
-    )
+    results = await search_openalex(q.strip(), limit)
 
     return {
         "source": "OpenAlex",
@@ -187,10 +205,4 @@ async def search_all(q: str, limit: int = 5):
         return {"results": []}
 
     limit = max(1, min(limit, 10))
-
-    return await search_all_sources(
-        q.strip(),
-        limit_per_source=limit,
-    )
-
-
+    return await search_all_sources(q.strip(), limit_per_source=limit)
