@@ -113,7 +113,7 @@ document.addEventListener("DOMContentLoaded", () => {
     card.className = `claim-card ${verdict}`;
 
     const bestEvidence = claimData.best_evidence;
-    const hasEvidence = bestEvidence && bestEvidence.snippet;
+    const hasEvidence = verdict !== "unverified" && bestEvidence && bestEvidence.snippet;
 
     let evidenceHtml = "";
     if (hasEvidence) {

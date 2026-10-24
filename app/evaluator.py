@@ -302,7 +302,7 @@ def evaluate_claim_against_evidence(
                 "sources": best_match_record.get("sources"),
                 "snippet": best_snippet,
             }
-            if best_match_record
+            if best_match_record and verdict in ("supported", "contradicted")
             else None
         ),
         "nli": nli_res,
