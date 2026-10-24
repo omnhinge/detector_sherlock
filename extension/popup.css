@@ -243,7 +243,7 @@ textarea:focus {
 
 .count-tag.supported { background: var(--supported-bg); color: var(--supported); }
 .count-tag.contradicted { background: var(--contradicted-bg); color: var(--contradicted); }
-.count-tag.unverified { background: var(--unverified-bg); color: var(--unverified); }
+.count-tag.unverified, .count-tag.inconclusive { background: var(--unverified-bg); color: var(--unverified); }
 
 /* Claims Section */
 .claims-header {
@@ -275,7 +275,7 @@ textarea:focus {
 
 .claim-card.supported { border-left-color: var(--supported); }
 .claim-card.contradicted { border-left-color: var(--contradicted); }
-.claim-card.unverified { border-left-color: var(--unverified); }
+.claim-card.unverified, .claim-card.inconclusive { border-left-color: var(--unverified); }
 
 .claim-top {
   display: flex;
@@ -297,7 +297,7 @@ textarea:focus {
 
 .claim-badge.supported { background: var(--supported-bg); color: var(--supported); }
 .claim-badge.contradicted { background: var(--contradicted-bg); color: var(--contradicted); }
-.claim-badge.unverified { background: var(--unverified-bg); color: var(--unverified); }
+.claim-badge.unverified, .claim-badge.inconclusive { background: var(--unverified-bg); color: var(--unverified); }
 
 .domain-tag {
   font-size: 10px;

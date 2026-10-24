@@ -4,7 +4,7 @@ from app.evaluator import evaluate_claim_against_evidence, check_for_contradicti
 def test_evaluator_empty_evidence():
     claim = "Some claim without any evidence."
     result = evaluate_claim_against_evidence(claim, [])
-    assert result["verdict"] == "unverified"
+    assert result["verdict"] == "inconclusive"
     assert result["confidence"] == 0.0
 
 

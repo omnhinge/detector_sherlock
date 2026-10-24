@@ -125,7 +125,7 @@ def evaluate_claim_against_evidence(
 
     if not claim_keywords:
         return {
-            "verdict": "unverified",
+            "verdict": "inconclusive",
             "confidence": 0.0,
             "explanation": "Claim does not contain sufficient specific factual keywords to verify.",
             "best_evidence": None,
@@ -134,7 +134,7 @@ def evaluate_claim_against_evidence(
 
     if not evidence_records:
         return {
-            "verdict": "unverified",
+            "verdict": "inconclusive",
             "confidence": 0.0,
             "explanation": "No relevant authoritative records were found for this claim.",
             "best_evidence": None,
@@ -219,10 +219,10 @@ def evaluate_claim_against_evidence(
         best_snippet = re.sub(r"<[^>]+>", " ", best_snippet).strip()
 
     # RELEVANCE THRESHOLD:
-    # If highest overlap is below 20% or no entity-matched record was found, it is unverified
+    # If highest overlap is below 20% or no entity-matched record was found, it is inconclusive
     if highest_score < 0.20 or not best_match_record:
         return {
-            "verdict": "unverified",
+            "verdict": "inconclusive",
             "confidence": 0.0,
             "explanation": "No sufficiently relevant records were found in queried databases.",
             "best_evidence": None,
@@ -274,7 +274,7 @@ def evaluate_claim_against_evidence(
                 "nli": nli_res,
             }
 
-    # Lexical threshold logic for support / unverified
+    # Lexical threshold logic for support / inconclusive
     if highest_score >= 0.60:
         verdict = "supported"
         explanation = (
@@ -282,7 +282,7 @@ def evaluate_claim_against_evidence(
             f"in paper '{best_match_record.get('title')}': \"{best_snippet}\""
         )
     else:
-        verdict = "unverified"
+        verdict = "inconclusive"
         if best_match_record:
             explanation = (
                 f"Related literature was found ('{best_match_record.get('title')}'), "

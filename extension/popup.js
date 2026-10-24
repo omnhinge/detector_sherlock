@@ -86,7 +86,11 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("evidenceCoverage").textContent = Math.round(summary.evidence_coverage || 0);
     document.getElementById("countSupported").textContent = summary.supported || 0;
     document.getElementById("countContradicted").textContent = summary.contradicted || 0;
-    document.getElementById("countUnverified").textContent = summary.unverified || 0;
+
+    const inconclusiveCount = summary.inconclusive ?? summary.unverified ?? 0;
+    const incEl = document.getElementById("countInconclusive") || document.getElementById("countUnverified");
+    if (incEl) incEl.textContent = inconclusiveCount;
+
     document.getElementById("claimsTotalCount").textContent = claims.length;
 
     document.getElementById("summaryCaveat").textContent = summary.caveat || "";
@@ -109,11 +113,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function createClaimCard(claimData) {
     const card = document.createElement("div");
-    const verdict = (claimData.verdict || "unverified").toLowerCase();
+    const rawVerdict = (claimData.verdict || "inconclusive").toLowerCase();
+    const verdict = rawVerdict === "unverified" ? "inconclusive" : rawVerdict;
     card.className = `claim-card ${verdict}`;
 
     const bestEvidence = claimData.best_evidence;
-    const hasEvidence = verdict !== "unverified" && bestEvidence && bestEvidence.snippet;
+    const hasEvidence = !["unverified", "inconclusive"].includes(verdict) && bestEvidence && bestEvidence.snippet;
 
     let evidenceHtml = "";
     if (hasEvidence) {

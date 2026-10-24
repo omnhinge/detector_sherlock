@@ -70,6 +70,7 @@ async def verify(request: VerifyRequest):
             "summary": {
                 "supported": 0,
                 "contradicted": 0,
+                "inconclusive": 0,
                 "unverified": 0,
                 "reliability_score": 0.0,
                 "hallucination_risk": "low",
@@ -113,7 +114,7 @@ async def verify(request: VerifyRequest):
     total_claims = len(claim_results)
     supported_count = sum(1 for c in claim_results if c["verdict"] == "supported")
     contradicted_count = sum(1 for c in claim_results if c["verdict"] == "contradicted")
-    unverified_count = sum(1 for c in claim_results if c["verdict"] == "unverified")
+    inconclusive_count = sum(1 for c in claim_results if c["verdict"] in ("inconclusive", "unverified"))
     claims_with_evidence = sum(1 for c in claim_results if c["evidence_count"] > 0)
 
     reliability_score = round((supported_count / total_claims) * 100, 1) if total_claims else 0.0
@@ -137,12 +138,13 @@ async def verify(request: VerifyRequest):
         "summary": {
             "supported": supported_count,
             "contradicted": contradicted_count,
-            "unverified": unverified_count,
+            "inconclusive": inconclusive_count,
+            "unverified": inconclusive_count,
             "reliability_score": reliability_score,
             "hallucination_risk": hallucination_risk,
             "evidence_coverage": evidence_coverage,
             "caveat": (
-                "An unverified verdict indicates that no authoritative records in the queried "
+                "An inconclusive verdict indicates that no authoritative records in the queried "
                 "databases corroborated the claim. A contradicted verdict indicates that retrieved "
                 "evidence asserts opposing findings."
             ),
