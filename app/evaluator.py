@@ -20,6 +20,13 @@ STOPWORDS = {
     "who", "whom", "why", "with", "won't", "would", "you", "your", "yours", "yourself",
 }
 
+# Generic words that can be capitalized at the beginning of a sentence but are not entities
+GENERIC_SENTENCE_STARTERS = {
+    "the", "a", "an", "in", "on", "at", "during", "for", "some", "all", "each",
+    "this", "that", "these", "those", "when", "while", "if", "regular", "recent",
+    "many", "most", "several", "overall", "general", "high", "low", "good", "bad",
+}
+
 # Opposing directional / polarity keyword pairs: (positive_word_set, negative_word_set)
 POLARITY_PAIRS = [
     ({"reduces", "decreases", "lowers", "prevents", "cures", "treats", "protects", "lowered"},
@@ -34,9 +41,10 @@ POLARITY_PAIRS = [
 def extract_keywords(text: str) -> set[str]:
     """
     Extract meaningful, lowercased keywords from a piece of text,
-    ignoring common filler words and short symbols.
+    ignoring HTML tags and common filler words.
     """
-    words = re.findall(r"\b[a-zA-Z0-9_-]{3,}\b", text.lower())
+    clean_text = re.sub(r"<[^>]+>", " ", text)
+    words = re.findall(r"\b[a-zA-Z0-9_-]{3,}\b", clean_text.lower())
     return {w for w in words if w not in STOPWORDS}
 
 
@@ -46,12 +54,12 @@ def check_for_contradiction(claim_text: str, candidate_text: str) -> tuple[bool,
     the assertion in the claim.
     Returns: (is_contradicted, explanation)
     """
+    clean_cand = re.sub(r"<[^>]+>", " ", candidate_text)
     claim_words = set(re.findall(r"\b[a-z0-9_-]+\b", claim_text.lower()))
-    cand_words = set(re.findall(r"\b[a-z0-9_-]+\b", candidate_text.lower()))
+    cand_words = set(re.findall(r"\b[a-z0-9_-]+\b", clean_cand.lower()))
 
     # Check polarity flip pairs
     for group_a, group_b in POLARITY_PAIRS:
-        # Case 1: Claim has word from group A, Candidate has opposing word from group B
         claim_has_a = claim_words & group_a
         cand_has_b = cand_words & group_b
         if claim_has_a and cand_has_b:
@@ -60,7 +68,6 @@ def check_for_contradiction(claim_text: str, candidate_text: str) -> tuple[bool,
                 f"Claim asserts '{', '.join(claim_has_a)}' whereas evidence asserts opposing '{', '.join(cand_has_b)}'.",
             )
 
-        # Case 2: Claim has word from group B, Candidate has opposing word from group A
         claim_has_b = claim_words & group_b
         cand_has_a = cand_words & group_a
         if claim_has_b and cand_has_a:
@@ -76,12 +83,14 @@ def find_best_passage(claim_keywords: set[str], abstract: str) -> tuple[str, flo
     """
     Look through every sentence in a paper's abstract to find the single
     sentence that has the highest overlap with the claim's keywords.
+    Strips raw XML/HTML tags like <jats:p>.
     Returns: (best_matching_sentence, match_ratio)
     """
     if not abstract or not claim_keywords:
         return ("", 0.0)
 
-    sentences = re.split(r"(?<=[.!?])\s+", abstract.strip())
+    clean_abstract = re.sub(r"<[^>]+>", " ", abstract).strip()
+    sentences = re.split(r"(?<=[.!?])\s+", clean_abstract)
     best_sentence = ""
     best_overlap = 0.0
 
@@ -109,16 +118,8 @@ def evaluate_claim_against_evidence(
     evidence_records: list[dict[str, Any]],
 ) -> dict[str, Any]:
     """
-    Compares a single claim against all retrieved evidence papers using a dual-tier pipeline:
-    1. Lexical fast filter & passage retrieval (keyword overlap)
-    2. Neural Natural Language Inference (NLI entailment / contradiction scoring)
-
-    Determines:
-    - verdict: 'supported', 'contradicted', or 'unverified'
-    - confidence: float between 0.0 and 1.0
-    - best_evidence: the paper and specific sentence that relates to the claim
-    - explanation: human-readable explanation of the verdict
-    - nli: neural inference distribution
+    Compares a single claim against retrieved evidence records.
+    Filters out noise documents that do not mention core entities.
     """
     claim_keywords = extract_keywords(claim)
 
@@ -140,14 +141,26 @@ def evaluate_claim_against_evidence(
             "nli": {"available": False},
         }
 
+    # Extract capitalized proper entities from the claim (e.g. 'Tesla', 'Roadster', 'Metformin')
+    claim_tokens = re.findall(r"\b[A-Za-z0-9_-]+\b", claim)
+    claim_entities = {
+        t.lower() for t in claim_tokens
+        if t[0].isupper() and t.lower() not in GENERIC_SENTENCE_STARTERS and t.lower() not in STOPWORDS
+    }
+
     best_match_record = None
     best_snippet = ""
     highest_score = 0.0
 
-    # First, scan all records for direct lexical contradictions
+    # Scan records
     for record in evidence_records:
-        title = record.get("title", "")
+        title = re.sub(r"<[^>]+>", " ", record.get("title", "")).strip()
         abstract = record.get("abstract", "")
+        cand_text = f"{title} {abstract}".lower()
+
+        # ENTITY GATE: If the claim mentions specific named entities, the paper MUST mention at least one!
+        if claim_entities and not any(entity in cand_text for entity in claim_entities):
+            continue
 
         # Check title
         title_keywords = extract_keywords(title)
@@ -157,12 +170,12 @@ def evaluate_claim_against_evidence(
             else 0.0
         )
 
-        # Check candidate snippets in abstract as well
+        # Check candidate snippets in abstract
         cand_snippet, passage_overlap = find_best_passage(claim_keywords, abstract)
         combined_overlap = max(topic_overlap, passage_overlap)
 
-        # If the paper is clearly discussing this subject (overlap >= 35%)
-        if combined_overlap >= 0.35:
+        # If the paper has meaningful topical overlap (>= 30%)
+        if combined_overlap >= 0.30:
             # Check contradiction against title
             is_contra_t, reason_t = check_for_contradiction(claim, title)
             if is_contra_t:
@@ -196,18 +209,31 @@ def evaluate_claim_against_evidence(
                         "nli": {"available": False},
                     }
 
-        # Track best matching record for support/unverified
+        # Track best matching record
         if combined_overlap > highest_score:
             highest_score = combined_overlap
             best_snippet = cand_snippet if cand_snippet else title
             best_match_record = record
 
-    # Tier 2: Neural Natural Language Inference check if best passage found
+    if best_snippet:
+        best_snippet = re.sub(r"<[^>]+>", " ", best_snippet).strip()
+
+    # RELEVANCE THRESHOLD:
+    # If highest overlap is below 20% or no entity-matched record was found, it is unverified
+    if highest_score < 0.20 or not best_match_record:
+        return {
+            "verdict": "unverified",
+            "confidence": 0.0,
+            "explanation": "No sufficiently relevant records were found in queried databases.",
+            "best_evidence": None,
+            "nli": {"available": False},
+        }
+
+    # Tier 2: Neural Natural Language Inference check ONLY on relevant documents
     nli_res = {"available": False}
     if best_match_record and best_snippet:
         nli_res = score_nli(premise=best_snippet, hypothesis=claim)
 
-    # If NLI is available, evaluate neural inference probabilities
     if nli_res.get("available") and nli_res.get("contradiction") is not None:
         p_contra = nli_res["contradiction"]
         p_entail = nli_res["entailment"]
