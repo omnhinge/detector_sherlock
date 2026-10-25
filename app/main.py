@@ -6,6 +6,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from app.sources.crossref import search_crossref
 from app.sources.openalex import search_openalex
+from app.sources.wikipedia import search_wikipedia
+from app.sources.factcheck import search_factcheck
+from app.sources.news import search_news
 from app.sources.search_all import search_all_sources
 import asyncio
 from app.evaluator import evaluate_claim_against_evidence
@@ -48,11 +51,14 @@ def home():
 def health():
     return {
         "status": "healthy",
-        "version": "0.3.0",
+        "version": "0.4.0",
         "features": {
             "spacy_atomic_claims": True,
             "sec_edgar": True,
             "world_bank_govdata": True,
+            "wikipedia": True,
+            "factcheck": True,
+            "realtime_news": True,
             "hybrid_nli": True,
         },
     }
@@ -208,3 +214,46 @@ async def search_all(q: str, limit: int = 5):
 
     limit = max(1, min(limit, 10))
     return await search_all_sources(q.strip(), limit_per_source=limit)
+
+
+@app.get("/sources/wikipedia")
+async def wikipedia_search(q: str, limit: int = 5):
+    if not q.strip():
+        return {"results": []}
+    limit = max(1, min(limit, 10))
+    results = await search_wikipedia(q.strip(), limit)
+    return {
+        "source": "Wikipedia",
+        "query": q,
+        "count": len(results),
+        "results": results,
+    }
+
+
+@app.get("/sources/factcheck")
+async def factcheck_search(q: str, limit: int = 5):
+    if not q.strip():
+        return {"results": []}
+    limit = max(1, min(limit, 10))
+    results = await search_factcheck(q.strip(), limit)
+    return {
+        "source": "FactCheck",
+        "query": q,
+        "count": len(results),
+        "results": results,
+    }
+
+
+@app.get("/sources/news")
+async def news_search(q: str, limit: int = 5):
+    if not q.strip():
+        return {"results": []}
+    limit = max(1, min(limit, 10))
+    results = await search_news(q.strip(), limit)
+    return {
+        "source": "News",
+        "query": q,
+        "count": len(results),
+        "results": results,
+    }
+

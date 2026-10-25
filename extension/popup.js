@@ -150,6 +150,7 @@ document.addEventListener("DOMContentLoaded", () => {
       space: "🚀 space",
       financial: "🏢 financial",
       government: "🏛 government",
+      news: "📰 news",
       general: "🌐 general",
     };
     const domainText = domainIcons[claimData.domain] || claimData.domain || "general";

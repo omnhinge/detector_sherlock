@@ -39,11 +39,19 @@ GOVERNMENT_KEYWORDS = {
     "ministry", "tax", "tariff", "economic", "economy",
 }
 
+NEWS_KEYWORDS = {
+    "breaking", "announced", "reported", "protest", "election", "war", "conflict",
+    "summit", "accident", "strike", "fire", "earthquake", "resigned", "killed",
+    "arrested", "speech", "minister", "president", "police", "investigation",
+    "scandal", "headline", "spokesperson", "sanctions", "casualty", "casualties",
+    "ceasefire", "yesterday", "today", "crisis", "diplomat", "press",
+}
+
 
 def detect_domain(claim: str) -> str:
     """
     Identifies the subject domain of a claim based on keywords.
-    Returns: 'biomedical', 'computing', 'space', 'financial', 'government', or 'general'.
+    Returns: 'biomedical', 'computing', 'space', 'financial', 'government', 'news', or 'general'.
     """
     text_lower = claim.lower()
     words = set(re.findall(r"\b[a-z0-9_-]+\b", text_lower))
@@ -54,6 +62,7 @@ def detect_domain(claim: str) -> str:
     space_matches = len(words & SPACE_KEYWORDS)
     fin_matches = len(words & FINANCIAL_KEYWORDS)
     gov_matches = len(words & GOVERNMENT_KEYWORDS)
+    news_matches = len(words & NEWS_KEYWORDS)
 
     counts = {
         "biomedical": bio_matches,
@@ -61,6 +70,7 @@ def detect_domain(claim: str) -> str:
         "space": space_matches,
         "financial": fin_matches,
         "government": gov_matches,
+        "news": news_matches,
     }
 
     best_domain = max(counts, key=counts.get)
@@ -76,17 +86,15 @@ def get_sources_for_domain(domain: str) -> list[str]:
     Returns the list of source names appropriate for a given domain.
     """
     if domain == "biomedical":
-        # Biomedical relies heavily on PubMed alongside Crossref and OpenAlex
-        return ["PubMed", "Crossref", "OpenAlex"]
+        return ["PubMed", "Wikipedia", "Crossref", "OpenAlex"]
     elif domain == "financial":
-        # Corporate disclosures and financial filings
-        return ["SEC EDGAR", "Crossref", "OpenAlex"]
+        return ["SEC EDGAR", "News", "Wikipedia", "Crossref", "OpenAlex"]
     elif domain == "government":
-        # Macroeconomic and official government data
-        return ["World Bank / GovData", "Crossref", "OpenAlex"]
+        return ["World Bank / GovData", "News", "Wikipedia", "Crossref"]
+    elif domain == "news":
+        return ["News", "FactCheck", "Wikipedia"]
     elif domain in ("computing", "space"):
-        # Technical/scientific computing doesn't belong in medical PubMed
-        return ["Crossref", "OpenAlex"]
+        return ["Wikipedia", "Crossref", "OpenAlex"]
     else:
-        # General claims check broad cross-disciplinary indexes
-        return ["Crossref", "OpenAlex"]
+        # General claims check broad encyclopedia, fact checks, news, and academic indexes
+        return ["Wikipedia", "FactCheck", "News", "Crossref", "OpenAlex"]

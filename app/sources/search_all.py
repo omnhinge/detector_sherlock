@@ -7,6 +7,9 @@ from app.sources.crossref import search_crossref
 from app.sources.openalex import search_openalex
 from app.sources.edgar import search_edgar
 from app.sources.datagov import search_datagov
+from app.sources.wikipedia import search_wikipedia
+from app.sources.factcheck import search_factcheck
+from app.sources.news import search_news
 
 
 def normalize_doi(doi: str | None) -> str | None:
@@ -114,6 +117,9 @@ async def search_all_sources(
         "OpenAlex": search_openalex,
         "SEC EDGAR": search_edgar,
         "World Bank / GovData": search_datagov,
+        "Wikipedia": search_wikipedia,
+        "FactCheck": search_factcheck,
+        "News": search_news,
     }
 
     if selected_sources:
