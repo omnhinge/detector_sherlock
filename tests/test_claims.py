@@ -19,3 +19,12 @@ def test_extract_claims_multiple():
     assert len(claims) == 2
     assert "Python was created by Guido van Rossum." in claims
     assert "It was first released in 1991." in claims
+
+
+def test_extract_claims_adverbial_clause_split():
+    text = "India had a GDP exceeding 3 trillion USD in 2023, while its annual inflation rate exceeded 85 % in the same year."
+    claims = extract_claims(text)
+    assert len(claims) == 2
+    assert "India had a GDP exceeding 3 trillion USD in 2023" in claims[0]
+    assert "annual inflation rate exceeded 85 % in the same year." in claims[1]
+    assert not claims[0].endswith("while its annual inflation rate")

@@ -1,4 +1,8 @@
-from app.evaluator import evaluate_claim_against_evidence, check_for_contradiction
+from app.evaluator import (
+    evaluate_claim_against_evidence,
+    check_for_contradiction,
+    verify_numerical_grounding,
+)
 
 
 def test_evaluator_empty_evidence():
@@ -38,3 +42,43 @@ def test_evaluator_contradicted():
     result = evaluate_claim_against_evidence(claim, evidence)
     assert result["verdict"] == "contradicted"
     assert "opposing" in result["explanation"]
+
+
+def test_numerical_grounding_rejects_hallucinated_percentage():
+    claim = "India's annual inflation rate exceeded 85 % in 2023."
+    evidence = [
+        {
+            "title": "India: Average annual inflation rate, 2001-2007",
+            "abstract": "The average annual inflation rate between 2001 and 2007 in India was reported.",
+            "url": "https://doi.org/10.1234/econ",
+            "sources": ["Crossref"],
+        }
+    ]
+    result = evaluate_claim_against_evidence(claim, evidence)
+    assert result["verdict"] == "inconclusive"
+    assert "quantitative figures" in result["explanation"] or "substantiated" in result["explanation"]
+
+
+def test_verify_numerical_grounding_direct():
+    # Percentage check
+    ok, reason = verify_numerical_grounding(
+        "Inflation rose by 85 % this quarter.",
+        "Inflation rose by 5.2% this quarter.",
+    )
+    assert not ok
+    assert "85%" in reason
+
+    # Scale check
+    ok, reason = verify_numerical_grounding(
+        "The GDP surpassed 3 trillion USD.",
+        "Economic projections for the period.",
+    )
+    assert not ok
+    assert "3 trillion" in reason
+
+    # Matching figures
+    ok, reason = verify_numerical_grounding(
+        "Quarterly revenue was 30 billion dollars.",
+        "The company reported quarterly revenue of 30 billion dollars in fiscal 2021.",
+    )
+    assert ok

@@ -77,8 +77,9 @@ def _split_with_spacy(sentence: str) -> list[str]:
     if conj_verb is None:
         for token in tokens:
             if token.dep_ == "advcl" and token.pos_ == "VERB" and token.head.pos_ == "VERB":
+                token_left = token.left_edge if hasattr(token, "left_edge") else (list(token.subtree)[0] if hasattr(token, "subtree") else token)
                 # Check if preceded by comma
-                if token.i > 0 and (tokens[token.i - 1].text == "," or tokens[token.left_edge.i - 1].text == ","):
+                if token.i > 0 and (tokens[token.i - 1].text == "," or (token_left.i > 0 and tokens[token_left.i - 1].text == ",")):
                     conj_verb = token
                     is_advcl = True
                     break
@@ -109,14 +110,17 @@ def _split_with_spacy(sentence: str) -> list[str]:
             cc_token = token
             break
 
-    # Find comma immediately preceding the conjunction if any
-    split_token_idx = cc_token.i if cc_token is not None else conj_verb.i
+    # Determine split token: prefer cc_token if present, else leftmost edge of conj_verb clause
+    conj_left = conj_verb.left_edge if hasattr(conj_verb, "left_edge") else (list(conj_verb.subtree)[0] if hasattr(conj_verb, "subtree") else conj_verb)
+    conj_left_idx = conj_left.i
+    split_token_idx = cc_token.i if cc_token is not None else conj_left_idx
     if split_token_idx > 0 and tokens[split_token_idx - 1].dep_ == "punct":
         split_token_idx -= 1
 
     # Clause 1: tokens from start of sentence up to the split point
     clause1_tokens = [t for t in tokens if t.i < split_token_idx]
     clause1_text = " ".join(t.text for t in clause1_tokens).strip()
+    clause1_text = re.sub(r"[,;:\s]+$", "", clause1_text)
 
     # Trailing punctuation of the original sentence (e.g. '.')
     trailing_punct = ""
@@ -128,16 +132,19 @@ def _split_with_spacy(sentence: str) -> list[str]:
         # Explicit subject already part of conj_verb's subtree
         conj_tokens = [t for t in conj_verb.subtree if t.dep_ != "punct"]
         clause2_body = " ".join(t.text for t in sorted(conj_tokens, key=lambda x: x.i))
-        clause2_text = f"{clause2_body}{trailing_punct}"
     else:
         # Inherits subject from head_verb
         subj_text = " ".join(t.text for t in sorted(head_subj.subtree, key=lambda x: x.i)) if head_subj else ""
         conj_tokens = [t for t in conj_verb.subtree if t.dep_ != "punct"]
         conj_body = " ".join(t.text for t in sorted(conj_tokens, key=lambda x: x.i))
-        if subj_text:
-            clause2_text = f"{subj_text} {conj_body}{trailing_punct}"
-        else:
-            clause2_text = f"{conj_body}{trailing_punct}"
+        conj_body = re.sub(r"^(while|whereas|although|and|but|so)\s+", "", conj_body.strip(), flags=re.I)
+        clause2_body = f"{subj_text} {conj_body}" if subj_text else conj_body
+
+    # Clean leading subordinate conjunctions and resolve possessive pronouns
+    clause2_body = re.sub(r"^(while|whereas|although|and|but|so)\s+", "", clause2_body.strip(), flags=re.I)
+    if head_subj and head_subj.text:
+        clause2_body = re.sub(r"^(its|their)\s+", f"{head_subj.text}'s ", clause2_body, flags=re.I)
+    clause2_text = f"{clause2_body}{trailing_punct}"
 
     return [clause1_text, clause2_text]
 

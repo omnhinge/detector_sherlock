@@ -113,6 +113,56 @@ def find_best_passage(claim_keywords: set[str], abstract: str) -> tuple[str, flo
     return (best_sentence, round(best_overlap, 2))
 
 
+def verify_numerical_grounding(claim: str, evidence: str) -> tuple[bool, str]:
+    """
+    Checks whether specific quantitative figures asserted in the claim
+    (percentages, scale magnitudes, calendar years, standalone statistics)
+    are corroborated or at least consistent with the retrieved evidence text.
+    Returns: (is_consistent, reason_if_inconsistent)
+    """
+    if not claim or not evidence:
+        return True, ""
+
+    clean_ev = re.sub(r"<[^>]+>", " ", evidence)
+    ev_all_nums = set(re.findall(r"\b\d+(?:[\.,]\d+)?\b", clean_ev))
+    ev_normalized_nums = {n.replace(",", "") for n in ev_all_nums} | ev_all_nums
+
+    # 1. Percentages (e.g. '85%', '85 %', '85 percent')
+    claim_pcts = re.findall(r"(\d+(?:\.\d+)?)\s*(?:%|\bpercent\b|\bpercentage\b)", claim, re.I)
+    for p in claim_pcts:
+        if p not in ev_normalized_nums:
+            return False, f"Claim asserts {p}%, but evidence contains no matching percentage figure"
+
+    # 2. Scale words ('3 trillion', '30 billion', '500 million')
+    claim_scales = re.findall(r"(\d+(?:\.\d+)?)\s*(trillion|billion|million)\b", claim, re.I)
+    for num, scale in claim_scales:
+        if scale.lower() not in clean_ev.lower() or num not in ev_normalized_nums:
+            return False, f"Claim specifies {num} {scale}, which is not corroborated in evidence"
+
+    # 3. Calendar years (1900-2099)
+    claim_years = set(re.findall(r"\b(19\d{2}|20\d{2})\b", claim))
+    ev_years = set(re.findall(r"\b(19\d{2}|20\d{2})\b", clean_ev))
+    if claim_years and ev_years and not (claim_years & ev_years):
+        c_yr = sorted(claim_years)[0]
+        e_yr = sorted(ev_years)[0]
+        return False, f"Claim references year {c_yr}, but evidence pertains to {e_yr}"
+
+    # 4. Standalone specific numbers (>= 10, not years or pcts)
+    raw_claim_nums = re.findall(r"\b\d+(?:[\.,]\d+)?\b", claim)
+    for n in raw_claim_nums:
+        norm_n = n.replace(",", "")
+        if norm_n in claim_pcts or norm_n in claim_years:
+            continue
+        try:
+            val = float(norm_n)
+            if val >= 10 and norm_n not in ev_normalized_nums:
+                return False, f"Claim mentions quantity {n}, which does not appear in evidence"
+        except ValueError:
+            pass
+
+    return True, ""
+
+
 def evaluate_claim_against_evidence(
     claim: str,
     evidence_records: list[dict[str, Any]],
@@ -256,6 +306,23 @@ def evaluate_claim_against_evidence(
                 "nli": nli_res,
             }
         elif p_entail >= 0.65:
+            is_grounded, grounding_reason = verify_numerical_grounding(claim, best_snippet)
+            if not is_grounded:
+                return {
+                    "verdict": "inconclusive",
+                    "confidence": round(0.5 * highest_score, 2),
+                    "explanation": (
+                        f"Related literature was found ('{best_match_record.get('title')}'), "
+                        f"but quantitative figures in the claim could not be verified ({grounding_reason})."
+                    ),
+                    "best_evidence": {
+                        "title": best_match_record.get("title"),
+                        "url": best_match_record.get("url"),
+                        "sources": best_match_record.get("sources"),
+                        "snippet": best_snippet,
+                    },
+                    "nli": nli_res,
+                }
             blended_conf = round(0.4 * highest_score + 0.6 * p_entail, 2)
             return {
                 "verdict": "supported",
@@ -276,11 +343,19 @@ def evaluate_claim_against_evidence(
 
     # Lexical threshold logic for support / inconclusive
     if highest_score >= 0.60:
-        verdict = "supported"
-        explanation = (
-            f"Supported by evidence from {best_match_record.get('sources', ['credible source'])} "
-            f"in paper '{best_match_record.get('title')}': \"{best_snippet}\""
-        )
+        is_grounded, grounding_reason = verify_numerical_grounding(claim, best_snippet)
+        if not is_grounded:
+            verdict = "inconclusive"
+            explanation = (
+                f"Related literature was found ('{best_match_record.get('title')}'), "
+                f"but quantitative figures in the claim could not be substantiated ({grounding_reason})."
+            )
+        else:
+            verdict = "supported"
+            explanation = (
+                f"Supported by evidence from {best_match_record.get('sources', ['credible source'])} "
+                f"in paper '{best_match_record.get('title')}': \"{best_snippet}\""
+            )
     else:
         verdict = "inconclusive"
         if best_match_record:
