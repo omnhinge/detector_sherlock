@@ -1,5 +1,5 @@
 from app.claims import extract_claims
-from app.router import detect_domain, get_sources_for_domain
+from app.router import detect_domain, get_sources_for_domain, route_claim
 from app.sources.pubmed import search_pubmed
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -60,6 +60,7 @@ def health():
             "factcheck": True,
             "realtime_news": True,
             "hybrid_nli": True,
+            "semantic_domain_detection": True,
         },
     }
 
@@ -87,8 +88,9 @@ async def verify(request: VerifyRequest):
 
     # Fetch evidence and evaluate each claim concurrently
     async def process_single_claim(claim_text: str) -> dict:
-        domain = detect_domain(claim_text)
-        sources_to_check = get_sources_for_domain(domain)
+        routing = route_claim(claim_text)
+        domain = routing.primary_domain
+        sources_to_check = routing.sources
 
         search_res = await search_all_sources(
             claim_text,
@@ -112,6 +114,11 @@ async def verify(request: VerifyRequest):
             "evidence_count": len(evidence_list),
             "sources": search_res.get("sources", {}),
             "evidence": evidence_list,
+            "routing": {
+                "domains": routing.domains,
+                "method": routing.method,
+                "confidence": routing.confidence,
+            },
         }
 
     claim_results = await asyncio.gather(*(process_single_claim(c) for c in claims))
