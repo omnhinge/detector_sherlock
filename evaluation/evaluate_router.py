@@ -156,6 +156,35 @@ def evaluate_classifier(
 
 
 if __name__ == "__main__":
-    from app.router import detect_domain
-    res = evaluate_classifier(detect_domain, name="Existing Keyword Router")
-    print(json.dumps(res, indent=2))
+    from app.domain_classifier import keyword_only_classify, classify_claim
+    from app.router import route_claim
+
+    print("Evaluating baseline keyword classifier...")
+    baseline_res = evaluate_classifier(keyword_only_classify, name="Keyword-Only Baseline")
+
+    print("Evaluating new hybrid semantic router...")
+    hybrid_res = evaluate_classifier(route_claim, name="Hybrid Semantic Router")
+
+    comparison = {
+        "baseline": baseline_res,
+        "hybrid_semantic": hybrid_res,
+        "improvements": {
+            "single_domain_accuracy_delta": round(hybrid_res["single_domain_accuracy"] - baseline_res["single_domain_accuracy"], 4),
+            "overall_accuracy_delta": round(hybrid_res["overall_primary_accuracy"] - baseline_res["overall_primary_accuracy"], 4),
+            "macro_f1_delta": round(hybrid_res["macro_f1"] - baseline_res["macro_f1"], 4),
+            "multi_domain_full_match_delta": round(hybrid_res["multi_domain"]["full_match_rate"] - baseline_res["multi_domain"]["full_match_rate"], 4),
+        }
+    }
+
+    report_path = os.path.join(os.path.dirname(__file__), "evaluation_report.json")
+    with open(report_path, "w", encoding="utf-8") as f:
+        json.dump(comparison, f, indent=2)
+
+    print("\n=== EVALUATION REPORT ===")
+    print(f"Dataset Size: {hybrid_res['dataset_size']} claims ({hybrid_res['single_domain_count']} single, {hybrid_res['multi_domain']['total_multi_claims']} multi)")
+    print(f"Single-Domain Accuracy: {baseline_res['single_domain_accuracy']:.2%} -> {hybrid_res['single_domain_accuracy']:.2%} (+{comparison['improvements']['single_domain_accuracy_delta']:.2%})")
+    print(f"Overall Accuracy:       {baseline_res['overall_primary_accuracy']:.2%} -> {hybrid_res['overall_primary_accuracy']:.2%} (+{comparison['improvements']['overall_accuracy_delta']:.2%})")
+    print(f"Macro-F1 Score:         {baseline_res['macro_f1']:.2%} -> {hybrid_res['macro_f1']:.2%} (+{comparison['improvements']['macro_f1_delta']:.2%})")
+    print(f"Multi-Domain Full Match: {baseline_res['multi_domain']['full_match_rate']:.2%} -> {hybrid_res['multi_domain']['full_match_rate']:.2%}")
+    print(f"Latency (mean / p95):   {hybrid_res['latency_ms']['mean']} ms / {hybrid_res['latency_ms']['p95']} ms")
+    print(f"Report saved to: {report_path}")

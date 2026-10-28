@@ -1,0 +1,192 @@
+{
+  "baseline": {
+    "classifier_name": "Keyword-Only Baseline",
+    "dataset_size": 68,
+    "single_domain_count": 58,
+    "single_domain_accuracy": 0.8103,
+    "overall_primary_accuracy": 0.75,
+    "macro_f1": 0.7553,
+    "per_domain": {
+      "biomedical": {
+        "tp": 12,
+        "fp": 3,
+        "fn": 3,
+        "precision": 0.8,
+        "recall": 0.8,
+        "f1": 0.8,
+        "support": 15
+      },
+      "computing": {
+        "tp": 11,
+        "fp": 0,
+        "fn": 2,
+        "precision": 1.0,
+        "recall": 0.8462,
+        "f1": 0.9167,
+        "support": 13
+      },
+      "financial": {
+        "tp": 11,
+        "fp": 3,
+        "fn": 3,
+        "precision": 0.7857,
+        "recall": 0.7857,
+        "f1": 0.7857,
+        "support": 14
+      },
+      "general": {
+        "tp": 7,
+        "fp": 8,
+        "fn": 3,
+        "precision": 0.4667,
+        "recall": 0.7,
+        "f1": 0.56,
+        "support": 10
+      },
+      "government_economic": {
+        "tp": 10,
+        "fp": 2,
+        "fn": 6,
+        "precision": 0.8333,
+        "recall": 0.625,
+        "f1": 0.7143,
+        "support": 16
+      }
+    },
+    "multi_domain": {
+      "total_multi_claims": 10,
+      "any_expected_domain_detected": 9,
+      "all_expected_domains_detected": 4,
+      "any_match_rate": 0.9,
+      "full_match_rate": 0.4
+    },
+    "latency_ms": {
+      "mean": 0.02,
+      "p95": 0.04
+    },
+    "confusion_matrix": {
+      "biomedical": {
+        "biomedical": 12,
+        "general": 2,
+        "financial": 1
+      },
+      "financial": {
+        "financial": 11,
+        "government_economic": 1,
+        "general": 1,
+        "biomedical": 1
+      },
+      "government_economic": {
+        "general": 4,
+        "government_economic": 10,
+        "biomedical": 1,
+        "financial": 1
+      },
+      "computing": {
+        "computing": 11,
+        "general": 1,
+        "biomedical": 1
+      },
+      "general": {
+        "general": 7,
+        "space": 1,
+        "financial": 1,
+        "government_economic": 1
+      }
+    }
+  },
+  "hybrid_semantic": {
+    "classifier_name": "Hybrid Semantic Router",
+    "dataset_size": 68,
+    "single_domain_count": 58,
+    "single_domain_accuracy": 0.9828,
+    "overall_primary_accuracy": 0.9265,
+    "macro_f1": 0.9291,
+    "per_domain": {
+      "biomedical": {
+        "tp": 14,
+        "fp": 2,
+        "fn": 1,
+        "precision": 0.875,
+        "recall": 0.9333,
+        "f1": 0.9032,
+        "support": 15
+      },
+      "computing": {
+        "tp": 13,
+        "fp": 1,
+        "fn": 0,
+        "precision": 0.9286,
+        "recall": 1.0,
+        "f1": 0.963,
+        "support": 13
+      },
+      "financial": {
+        "tp": 13,
+        "fp": 1,
+        "fn": 1,
+        "precision": 0.9286,
+        "recall": 0.9286,
+        "f1": 0.9286,
+        "support": 14
+      },
+      "general": {
+        "tp": 9,
+        "fp": 0,
+        "fn": 1,
+        "precision": 1.0,
+        "recall": 0.9,
+        "f1": 0.9474,
+        "support": 10
+      },
+      "government_economic": {
+        "tp": 14,
+        "fp": 1,
+        "fn": 2,
+        "precision": 0.9333,
+        "recall": 0.875,
+        "f1": 0.9032,
+        "support": 16
+      }
+    },
+    "multi_domain": {
+      "total_multi_claims": 10,
+      "any_expected_domain_detected": 10,
+      "all_expected_domains_detected": 7,
+      "any_match_rate": 1.0,
+      "full_match_rate": 0.7
+    },
+    "latency_ms": {
+      "mean": 197.89,
+      "p95": 31.47
+    },
+    "confusion_matrix": {
+      "biomedical": {
+        "biomedical": 14,
+        "computing": 1
+      },
+      "financial": {
+        "financial": 13,
+        "biomedical": 1
+      },
+      "government_economic": {
+        "government_economic": 14,
+        "biomedical": 1,
+        "financial": 1
+      },
+      "computing": {
+        "computing": 13
+      },
+      "general": {
+        "general": 9,
+        "government_economic": 1
+      }
+    }
+  },
+  "improvements": {
+    "single_domain_accuracy_delta": 0.1725,
+    "overall_accuracy_delta": 0.1765,
+    "macro_f1_delta": 0.1738,
+    "multi_domain_full_match_delta": 0.3
+  }
+}
