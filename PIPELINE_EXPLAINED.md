@@ -34,12 +34,14 @@ Instead of asking another AI to check it, **Detector Sherlock** passes the AI's 
                                         │
                                         ▼
    ┌────────────────────────────────────────────────────────────────────────┐
-   │ 3. DOMAIN DETECTION & ROUTING (app/router.py)                          │
-   │    Analyzes keywords to pick the right authoritative databases:        │
-   │    - Biomedical -> PubMed, Crossref, OpenAlex                          │
-   │    - Financial  -> SEC EDGAR, Crossref                                 │
-   │    - Government -> World Bank / GovData                                │
-   │    - Computing  -> Crossref, OpenAlex                                  │
+   │ 3. HYBRID SEMANTIC DOMAIN ROUTING (app/domain_classifier.py & router)  │
+   │    Combines sentence embeddings (all-MiniLM-L6-v2) & lexical signals:  │
+   │    - Biomedical -> PubMed, Wikipedia, Crossref, OpenAlex               │
+   │    - Financial  -> SEC EDGAR, News, Wikipedia, Crossref, OpenAlex      │
+   │    - Government -> World Bank / GovData, News, Wikipedia, Crossref     │
+   │    - Computing  -> Wikipedia, Crossref, OpenAlex                       │
+   │    - Multi-Domain -> Merges target sources without duplicate queries   │
+   │    - Fallback   -> Offline keyword router & broad cross-index search   │
    └────────────────────────────────────┬───────────────────────────────────┘
                                         │
                                         ▼
