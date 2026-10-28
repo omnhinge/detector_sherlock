@@ -1,0 +1,66 @@
+{
+  "classifier_name": "Existing Keyword Router",
+  "dataset_size": 68,
+  "single_domain_count": 58,
+  "single_domain_accuracy": 0.5517,
+  "overall_primary_accuracy": 0.5294,
+  "macro_f1": 0.5617,
+  "per_domain": {
+    "biomedical": {
+      "tp": 9,
+      "fp": 3,
+      "fn": 6,
+      "precision": 0.75,
+      "recall": 0.6,
+      "f1": 0.6667,
+      "support": 15
+    },
+    "computing": {
+      "tp": 6,
+      "fp": 1,
+      "fn": 7,
+      "precision": 0.8571,
+      "recall": 0.4615,
+      "f1": 0.6,
+      "support": 13
+    },
+    "financial": {
+      "tp": 7,
+      "fp": 2,
+      "fn": 7,
+      "precision": 0.7778,
+      "recall": 0.5,
+      "f1": 0.6087,
+      "support": 14
+    },
+    "general": {
+      "tp": 7,
+      "fp": 23,
+      "fn": 3,
+      "precision": 0.2333,
+      "recall": 0.7,
+      "f1": 0.35,
+      "support": 10
+    },
+    "government_economic": {
+      "tp": 7,
+      "fp": 1,
+      "fn": 9,
+      "precision": 0.875,
+      "recall": 0.4375,
+      "f1": 0.5833,
+      "support": 16
+    }
+  },
+  "multi_domain": {
+    "total_multi_claims": 10,
+    "any_expected_domain_detected": 9,
+    "all_expected_domains_detected": 0,
+    "any_match_rate": 0.9,
+    "full_match_rate": 0.0
+  },
+  "latency_ms": {
+    "mean": 0.02,
+    "p95": 0.03
+  }
+}

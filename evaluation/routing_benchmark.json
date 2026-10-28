@@ -1,0 +1,478 @@
+[
+  {
+    "id": "bio_01",
+    "claim": "Metformin reduces hepatic gluconeogenesis and is widely prescribed for type 2 diabetes mellitus.",
+    "expected_domains": ["biomedical"],
+    "primary_domain": "biomedical",
+    "description": "Standard biomedical claim with disease and drug keywords"
+  },
+  {
+    "id": "bio_02",
+    "claim": "The patient presented with acute myocardial infarction requiring immediate percutaneous coronary intervention.",
+    "expected_domains": ["biomedical"],
+    "primary_domain": "biomedical",
+    "description": "Clinical terminology without basic 'treatment' keyword"
+  },
+  {
+    "id": "bio_03",
+    "claim": "Monoclonal antibodies targeting amyloid-beta plaques demonstrate modest slowing of cognitive decline.",
+    "expected_domains": ["biomedical"],
+    "primary_domain": "biomedical",
+    "description": "Biochemical and therapeutic pharmacology paraphrase"
+  },
+  {
+    "id": "bio_04",
+    "claim": "CRISPR-Cas9 endonuclease facilitates targeted double-strand breaks in genomic sequences.",
+    "expected_domains": ["biomedical"],
+    "primary_domain": "biomedical",
+    "description": "Molecular genetics and gene editing terminology"
+  },
+  {
+    "id": "bio_05",
+    "claim": "Elevated serum creatinine and blood urea nitrogen indicate declining glomerular filtration rate in renal failure.",
+    "expected_domains": ["biomedical"],
+    "primary_domain": "biomedical",
+    "description": "Diagnostic laboratory markers for kidney disease"
+  },
+  {
+    "id": "bio_06",
+    "claim": "Phase III randomized controlled double-blind trials demonstrated vaccine efficacy against symptomatic pathogen transmission.",
+    "expected_domains": ["biomedical"],
+    "primary_domain": "biomedical",
+    "description": "Epidemiological clinical trial claim"
+  },
+  {
+    "id": "bio_07",
+    "claim": "Synthetic oligonucleotides silence oncogenic mRNA transcripts in malignant neoplasms.",
+    "expected_domains": ["biomedical"],
+    "primary_domain": "biomedical",
+    "description": "Advanced oncology without common cancer keyword"
+  },
+  {
+    "id": "bio_08",
+    "claim": "Statin therapy lowers low-density lipoprotein cholesterol to prevent atherosclerotic cardiovascular events.",
+    "expected_domains": ["biomedical"],
+    "primary_domain": "biomedical",
+    "description": "Cardiology lipid-lowering pharmacotherapy"
+  },
+  {
+    "id": "bio_09",
+    "claim": "Endogenous dopamine neurotransmission in the striatum regulates voluntary motor control and habit formation.",
+    "expected_domains": ["biomedical"],
+    "primary_domain": "biomedical",
+    "description": "Neurobiology and neuroanatomy"
+  },
+  {
+    "id": "bio_10",
+    "claim": "Sublingual administration of nitroglycerin relieves anginal chest discomfort via vascular smooth muscle relaxation.",
+    "expected_domains": ["biomedical"],
+    "primary_domain": "biomedical",
+    "description": "Pharmacological vascular physiology"
+  },
+  {
+    "id": "bio_11",
+    "claim": "In vitro bacterial cultures exhibited resistance to beta-lactam antibiotics via beta-lactamase enzymatic degradation.",
+    "expected_domains": ["biomedical"],
+    "primary_domain": "biomedical",
+    "description": "Microbiology and antimicrobial resistance"
+  },
+  {
+    "id": "bio_12",
+    "claim": "Pulmonary surfactant deficiency in premature neonates causes infant respiratory distress syndrome.",
+    "expected_domains": ["biomedical"],
+    "primary_domain": "biomedical",
+    "description": "Pediatric pathology and neonatology"
+  },
+  {
+    "id": "fin_01",
+    "claim": "Apple reported record quarterly revenue of 119 billion dollars driven by iPhone services growth.",
+    "expected_domains": ["financial"],
+    "primary_domain": "financial",
+    "description": "Standard corporate financial disclosure with earnings keywords"
+  },
+  {
+    "id": "fin_02",
+    "claim": "The electric automaker generated free cash flow of two billion dollars in the recent reporting period.",
+    "expected_domains": ["financial"],
+    "primary_domain": "financial",
+    "description": "Cash flow and financial metrics without company name or stock ticker"
+  },
+  {
+    "id": "fin_03",
+    "claim": "The initial public offering was priced at thirty-two dollars per equity share on the exchange.",
+    "expected_domains": ["financial"],
+    "primary_domain": "financial",
+    "description": "Capital markets equity offering"
+  },
+  {
+    "id": "fin_04",
+    "claim": "Operating profit margins contracted by 150 basis points due to elevated supply chain overhead.",
+    "expected_domains": ["financial"],
+    "primary_domain": "financial",
+    "description": "Corporate profitability and basis point margin analysis"
+  },
+  {
+    "id": "fin_05",
+    "claim": "The conglomerate completed a leveraged buyout funded through high-yield corporate debentures.",
+    "expected_domains": ["financial"],
+    "primary_domain": "financial",
+    "description": "Mergers and acquisitions financing terminology"
+  },
+  {
+    "id": "fin_06",
+    "claim": "Form 10-K filings filed with the Securities and Exchange Commission revealed unrecognized balance sheet liabilities.",
+    "expected_domains": ["financial"],
+    "primary_domain": "financial",
+    "description": "SEC EDGAR filing disclosure statement"
+  },
+  {
+    "id": "fin_07",
+    "claim": "Shareholders approved an annual cash dividend payout of one dollar and twenty cents per common share.",
+    "expected_domains": ["financial"],
+    "primary_domain": "financial",
+    "description": "Shareholder dividend distribution"
+  },
+  {
+    "id": "fin_08",
+    "claim": "Convertible bondholders exercised their warrants following a surge in the enterprise valuation.",
+    "expected_domains": ["financial"],
+    "primary_domain": "financial",
+    "description": "Derivative securities and corporate valuation"
+  },
+  {
+    "id": "fin_09",
+    "claim": "Earnings before interest, taxes, depreciation, and amortization rose twelve percent year-over-year.",
+    "expected_domains": ["financial"],
+    "primary_domain": "financial",
+    "description": "EBITDA performance metric"
+  },
+  {
+    "id": "fin_10",
+    "claim": "Institutional investors liquidated long derivative positions across tech sector equity indices.",
+    "expected_domains": ["financial"],
+    "primary_domain": "financial",
+    "description": "Institutional asset management and equity derivatives"
+  },
+  {
+    "id": "fin_11",
+    "claim": "The credit rating agency downgraded the sovereign issuer's senior unsecured debt to speculative grade.",
+    "expected_domains": ["financial"],
+    "primary_domain": "financial",
+    "description": "Credit ratings and debt classification"
+  },
+  {
+    "id": "fin_12",
+    "claim": "Working capital requirements surged as days sales outstanding lengthened to seventy-five days.",
+    "expected_domains": ["financial"],
+    "primary_domain": "financial",
+    "description": "Corporate accounting working capital"
+  },
+  {
+    "id": "gov_01",
+    "claim": "India recorded a gross domestic product growth rate of 7.2 percent according to the national statistical office.",
+    "expected_domains": ["government_economic"],
+    "primary_domain": "government_economic",
+    "description": "Macroeconomic GDP metric"
+  },
+  {
+    "id": "gov_02",
+    "claim": "The central bank elevated its benchmark lending rate by 25 basis points to dampen consumer price index surges.",
+    "expected_domains": ["government_economic"],
+    "primary_domain": "government_economic",
+    "description": "Monetary policy and inflation control"
+  },
+  {
+    "id": "gov_03",
+    "claim": "The fiscal deficit widened to six percent of national economic output following expanded public expenditures.",
+    "expected_domains": ["government_economic"],
+    "primary_domain": "government_economic",
+    "description": "Fiscal deficit and public finance"
+  },
+  {
+    "id": "gov_04",
+    "claim": "The World Bank approved development assistance loans for rural electrification and drinking water infrastructure.",
+    "expected_domains": ["government_economic"],
+    "primary_domain": "government_economic",
+    "description": "Multilateral development institution project funding"
+  },
+  {
+    "id": "gov_05",
+    "claim": "National unemployment rates declined to historic lows of three point four percent as labor force participation improved.",
+    "expected_domains": ["government_economic"],
+    "primary_domain": "government_economic",
+    "description": "Labor market statistics and government census"
+  },
+  {
+    "id": "gov_06",
+    "claim": "The ministry of finance tabled the comprehensive annual union budget before parliament for legislative assent.",
+    "expected_domains": ["government_economic"],
+    "primary_domain": "government_economic",
+    "description": "Government budget and legislative procedure"
+  },
+  {
+    "id": "gov_07",
+    "claim": "Bilateral trade tariffs were imposed on imported steel billets and agricultural commodities.",
+    "expected_domains": ["government_economic"],
+    "primary_domain": "government_economic",
+    "description": "Trade policy tariffs and government customs duties"
+  },
+  {
+    "id": "gov_08",
+    "claim": "Sovereign treasury yields inverted along the two-year and ten-year maturity curve signalling macroeconomic contraction.",
+    "expected_domains": ["government_economic"],
+    "primary_domain": "government_economic",
+    "description": "Macroeconomic yield curve analysis"
+  },
+  {
+    "id": "gov_09",
+    "claim": "Foreign direct investment inflows into developing economies contracted sharply during global monetary tightening.",
+    "expected_domains": ["government_economic"],
+    "primary_domain": "government_economic",
+    "description": "FDI statistics and international trade flows"
+  },
+  {
+    "id": "gov_10",
+    "claim": "The demographic census confirmed an urbanization rate exceeding thirty-five percent of the total populace.",
+    "expected_domains": ["government_economic"],
+    "primary_domain": "government_economic",
+    "description": "Census and demographic statistics"
+  },
+  {
+    "id": "gov_11",
+    "claim": "The Reserve Bank of India retained repo rates unchanged to balance price stability with economic expansion.",
+    "expected_domains": ["government_economic"],
+    "primary_domain": "government_economic",
+    "description": "RBI monetary policy repo rate decision"
+  },
+  {
+    "id": "gov_12",
+    "claim": "Subsidies for renewable energy adoption were enacted through statutory public welfare legislation.",
+    "expected_domains": ["government_economic"],
+    "primary_domain": "government_economic",
+    "description": "Public sector statutory policy and welfare subsidies"
+  },
+  {
+    "id": "comp_01",
+    "claim": "Python uses automated reference counting and a cyclic garbage collector to manage heap memory allocations.",
+    "expected_domains": ["computing"],
+    "primary_domain": "computing",
+    "description": "Programming language memory management"
+  },
+  {
+    "id": "comp_02",
+    "claim": "The compiler transforms abstract syntax trees into intermediate representation before target machine bytecode emission.",
+    "expected_domains": ["computing"],
+    "primary_domain": "computing",
+    "description": "Compiler engineering terminology"
+  },
+  {
+    "id": "comp_03",
+    "claim": "Distributed consensus in the replicated state machine is guaranteed via the Raft leader election protocol.",
+    "expected_domains": ["computing"],
+    "primary_domain": "computing",
+    "description": "Distributed systems consensus algorithms"
+  },
+  {
+    "id": "comp_04",
+    "claim": "The relational database executes query plans using B-tree indexing and cost-based join optimization.",
+    "expected_domains": ["computing"],
+    "primary_domain": "computing",
+    "description": "Database internals and indexing"
+  },
+  {
+    "id": "comp_05",
+    "claim": "Convolutional layers extract spatial feature maps using learnable kernels and rectified linear unit activations.",
+    "expected_domains": ["computing"],
+    "primary_domain": "computing",
+    "description": "Deep learning neural network architecture"
+  },
+  {
+    "id": "comp_06",
+    "claim": "Asymptotic time complexity of the sorting algorithm is bounded by big-O of N log N comparisons in worst case.",
+    "expected_domains": ["computing"],
+    "primary_domain": "computing",
+    "description": "Algorithm analysis and computational complexity"
+  },
+  {
+    "id": "comp_07",
+    "claim": "The microkernel operating system minimizes kernel privilege by isolating device drivers in user space processes.",
+    "expected_domains": ["computing"],
+    "primary_domain": "computing",
+    "description": "Operating systems architecture"
+  },
+  {
+    "id": "comp_08",
+    "claim": "RESTful endpoints return serialized JSON payloads over encrypted transport layer security sessions.",
+    "expected_domains": ["computing"],
+    "primary_domain": "computing",
+    "description": "Web service APIs and networking protocols"
+  },
+  {
+    "id": "comp_09",
+    "claim": "The open-source version control system tracks immutable commit snapshots via SHA-256 cryptographic hashes.",
+    "expected_domains": ["computing"],
+    "primary_domain": "computing",
+    "description": "Version control and cryptographic hashes"
+  },
+  {
+    "id": "comp_10",
+    "claim": "RISC-V architecture specifies modular instruction sets with variable register widths and hardware privilege rings.",
+    "expected_domains": ["computing"],
+    "primary_domain": "computing",
+    "description": "Computer architecture and hardware processors"
+  },
+  {
+    "id": "comp_11",
+    "claim": "Vector database indices approximate nearest neighbors using hierarchical navigable small world graphs.",
+    "expected_domains": ["computing"],
+    "primary_domain": "computing",
+    "description": "Vector search algorithms and embeddings"
+  },
+  {
+    "id": "comp_12",
+    "claim": "Asynchronous event loops multiplex concurrent non-blocking socket I/O operations across multiple connections.",
+    "expected_domains": ["computing"],
+    "primary_domain": "computing",
+    "description": "Concurrency and non-blocking asynchronous programming"
+  },
+  {
+    "id": "gen_01",
+    "claim": "The Eiffel Tower was completed in Paris for the 1889 Exposition Universelle.",
+    "expected_domains": ["general"],
+    "primary_domain": "general",
+    "description": "Historical architecture claim"
+  },
+  {
+    "id": "gen_02",
+    "claim": "William Shakespeare wrote Hamlet and Macbeth during the Elizabethan and Jacobean eras.",
+    "expected_domains": ["general"],
+    "primary_domain": "general",
+    "description": "Literature and historical biography"
+  },
+  {
+    "id": "gen_03",
+    "claim": "Mount Everest is the highest terrestrial mountain peak above sea level on Earth.",
+    "expected_domains": ["general"],
+    "primary_domain": "general",
+    "description": "Physical geography fact"
+  },
+  {
+    "id": "gen_04",
+    "claim": "The Renaissance originated in fourteenth-century Florence before spreading across Western Europe.",
+    "expected_domains": ["general"],
+    "primary_domain": "general",
+    "description": "Art history and cultural movements"
+  },
+  {
+    "id": "gen_05",
+    "claim": "The ancient Library of Alexandria was one of the largest and most significant archives of antiquity.",
+    "expected_domains": ["general"],
+    "primary_domain": "general",
+    "description": "Ancient civilization history"
+  },
+  {
+    "id": "gen_06",
+    "claim": "Beethoven composed his Ninth Symphony in D minor despite profound hearing impairment in later life.",
+    "expected_domains": ["general"],
+    "primary_domain": "general",
+    "description": "Classical music history"
+  },
+  {
+    "id": "gen_07",
+    "claim": "The Pacific Ocean contains the Mariana Trench, the deepest oceanic trench on the planet.",
+    "expected_domains": ["general"],
+    "primary_domain": "general",
+    "description": "Oceanography and geography"
+  },
+  {
+    "id": "gen_08",
+    "claim": "The Amazon rainforest produces substantial oxygen and shelters millions of endemic botanical species.",
+    "expected_domains": ["general"],
+    "primary_domain": "general",
+    "description": "General ecology and natural history"
+  },
+  {
+    "id": "gen_09",
+    "claim": "The Rosetta Stone provided the bilingual key that unlocked modern translation of Egyptian hieroglyphics.",
+    "expected_domains": ["general"],
+    "primary_domain": "general",
+    "description": "Archaeology and linguistics"
+  },
+  {
+    "id": "gen_10",
+    "claim": "The treaty of Versailles was signed in 1919 at the close of the First World War.",
+    "expected_domains": ["general"],
+    "primary_domain": "general",
+    "description": "Modern world history"
+  },
+  {
+    "id": "multi_01",
+    "claim": "Pfizer reported fourteen billion dollars in quarterly revenue from its COVID-19 vaccine and antiviral therapies.",
+    "expected_domains": ["biomedical", "financial"],
+    "primary_domain": "biomedical",
+    "description": "Legitimate pharmaceutical revenue spanning biomedical and financial domains"
+  },
+  {
+    "id": "multi_02",
+    "claim": "DeepMind developed AlphaFold, an artificial intelligence neural network that accurately predicts three-dimensional protein structures.",
+    "expected_domains": ["computing", "biomedical"],
+    "primary_domain": "computing",
+    "description": "Computational biology combining machine learning and protein biochemistry"
+  },
+  {
+    "id": "multi_03",
+    "claim": "Moderna raised capital through public equity markets to finance clinical trials for mRNA oncology vaccines.",
+    "expected_domains": ["biomedical", "financial"],
+    "primary_domain": "biomedical",
+    "description": "Biotech capital markets and oncology trials"
+  },
+  {
+    "id": "multi_04",
+    "claim": "Government healthcare expenditures grew to nine percent of GDP to subsidize prescription pharmaceutical therapies.",
+    "expected_domains": ["government_economic", "biomedical"],
+    "primary_domain": "government_economic",
+    "description": "Health economics combining public GDP expenditure and medicine"
+  },
+  {
+    "id": "multi_05",
+    "claim": "Nvidia reported eighty billion dollars in fiscal revenue driven by surging demand for AI computing clusters and GPU accelerators.",
+    "expected_domains": ["financial", "computing"],
+    "primary_domain": "financial",
+    "description": "Semiconductor tech earnings bridging computing and corporate finance"
+  },
+  {
+    "id": "multi_06",
+    "claim": "The central bank introduced an algorithmic digital currency infrastructure to streamline national payment settlements.",
+    "expected_domains": ["government_economic", "computing"],
+    "primary_domain": "government_economic",
+    "description": "Central bank digital currency bridging monetary policy and computing"
+  },
+  {
+    "id": "multi_07",
+    "claim": "Hospital systems invested forty million dollars in electronic health record databases and predictive diagnostics.",
+    "expected_domains": ["biomedical", "financial", "computing"],
+    "primary_domain": "biomedical",
+    "description": "Health informatics bridging medical, financial, and computing"
+  },
+  {
+    "id": "multi_08",
+    "claim": "The Federal Reserve analyzed high-frequency stock trading data using distributed cloud algorithms to identify market volatility.",
+    "expected_domains": ["government_economic", "financial", "computing"],
+    "primary_domain": "government_economic",
+    "description": "Regulatory market surveillance bridging central banking, finance, and computing"
+  },
+  {
+    "id": "multi_09",
+    "claim": "Biotechnology venture capital firms deployed two billion dollars into genomic sequencing and gene therapy startups.",
+    "expected_domains": ["financial", "biomedical"],
+    "primary_domain": "financial",
+    "description": "Venture capital investment into genomics"
+  },
+  {
+    "id": "multi_10",
+    "claim": "State treasury ministries deployed automated machine learning pipelines to detect tax evasion and corporate tariff fraud.",
+    "expected_domains": ["government_economic", "computing"],
+    "primary_domain": "government_economic",
+    "description": "Public finance compliance powered by machine learning"
+  }
+]
